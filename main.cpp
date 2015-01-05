@@ -46,14 +46,19 @@ int moveLeft        = 0;
 int moveRight       = 0;
 int moveBack        = 0;
 int moveForth       = 0;
+int mouse_l         = 0;
+int mouse_m         = 0;
+int mouse_r         = 0;
 
 void getScreenResolution(int& h, int& v);
 
 void iniGl();
 
+void mouseButton(int b,int s,int x,int y);
+
 void mouseMove(int x, int y);
 
-void mouseAction( int x, int y);
+void mouseAction(int x, int y);
 
 void glutMouseFunc(int button, int state, int x, int y);
 
@@ -96,6 +101,7 @@ void iniGl(){
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
     glutInitWindowSize(window_h,window_v);
     glutCreateWindow(WINDOW_TITLE);
+    glutMouseFunc(&mouseButton);
     glutMotionFunc(&mouseAction);
     glutPassiveMotionFunc(&mouseMove);
     glutKeyboardFunc(&keyPressed);
@@ -109,15 +115,41 @@ void iniGl(){
         glutFullScreen();
 }
 
-// Updates the last free mouse position
-void mouseMove(int x, int y){
+void mouseButton(int b,int s,int x,int y){
+    switch (b){
+        case GLUT_LEFT_BUTTON:
+            if(s == GLUT_DOWN)
+                mouse_l = 1;
+            else
+                mouse_l = 0;
+            break;
+        case GLUT_MIDDLE_BUTTON:
+            if(s == GLUT_DOWN)
+                mouse_m = 1;
+            else
+                mouse_m = 0;
+            break;
+        case GLUT_RIGHT_BUTTON:
+            if(s == GLUT_DOWN)
+                mouse_r = 1;
+            else
+                mouse_r = 0;
+            break;
+        default:
+            break;
+    }
+}
+
+void mouseMove(int x,int y){
     mouse_x = x;
     mouse_y = y;
 }
 
-void mouseAction( int x, int y){
-    view_x +=  VIEW_W*((double)(mouse_x-x)/window_h);
-    view_y += -VIEW_H*((double)(mouse_y-y)/window_v);
+void mouseAction(int x,int y){
+    if(mouse_m){
+        view_x +=  VIEW_W*((double)(mouse_x-x)/window_h);
+        view_y += -VIEW_H*((double)(mouse_y-y)/window_v);
+    }
     mouse_x = x;
     mouse_y = y;
 }
