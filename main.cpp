@@ -1,9 +1,8 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
+#include "Textured.h"
 #include <iostream>
-#include "wtypes.h"
-#include "lodepng.h"
 #include <iomanip>
 #include <cmath>
 
@@ -13,8 +12,8 @@
 #define FRAME_TIME      10
 
 // Camera Parameters
-#define VIEW_W          16
-#define VIEW_H          9
+#define VIEW_W          160
+#define VIEW_H          90
 
 // Keyboard Commands
 #define EXIT            27
@@ -24,9 +23,9 @@
 #define MOVE_RIGHT      'd'
 
 using namespace std;
-using namespace lodepng;
 
-unsigned int texture[1];
+Textured arara;
+Textured checkIcon;
 
 double mouse_x      = 0;
 double mouse_y      = 0;
@@ -69,8 +68,6 @@ void keyPressed(unsigned char key, int x, int y);
 
 void keyReleased(unsigned char key, int x, int y);
 
-void loadGLTextures(char* imagePath, int textureID);
-
 void updateValues(int n);
 
 void RenderScene();
@@ -83,7 +80,8 @@ int main(int argc, char **argv){
 
     iniGl();
 
-    loadGLTextures("iconeLixeira.png",0);
+    arara.init(0,0,15,15,0,"arara.png");
+    checkIcon.init(0,0,15,15,0,"checkIcon.png");
 
     glutMainLoop();
 
@@ -162,6 +160,12 @@ void mouseAction(int x,int y){
         view_x +=  VIEW_W*((double)(mouse_x-x)/window_h);
         view_y += -VIEW_H*((double)(mouse_y-y)/window_v);
     }
+    if(mouse_l){
+        arara.x +=  VIEW_W*((double)(mouse_x-x)/window_h);
+        arara.y += -VIEW_H*((double)(mouse_y-y)/window_v);
+    }
+    if(mouse_r)
+        arara.r +=  VIEW_W*((double)(mouse_x-x)/window_h);
     mouse_x = x;
     mouse_y = y;
 }
@@ -207,18 +211,6 @@ void keyReleased(unsigned char key, int x, int y){
     }
 }
 
-void loadGLTextures(char* imagePath, int textureID){
-    vector<unsigned char> image;
-    unsigned width;
-    unsigned height;
-    decode(image,width,height,imagePath);
-    glGenTextures(2, &texture[textureID]);
-    glBindTexture(GL_TEXTURE_2D, texture[textureID]);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
-}
-
 void updateValues(int n){
 
     // Frame limiter
@@ -250,45 +242,15 @@ void RenderScene(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPushMatrix();
 
-        glEnable(GL_TEXTURE_2D);
-            glPushMatrix();
-                glColor3f(1.0,1.0,1.0);
-                glBindTexture(GL_TEXTURE_2D,texture[0]);
-                glBegin(GL_QUADS);
-                    glTexCoord2f(0,0);
-                    glVertex2f(0,0);
-                    glTexCoord2f(0,1);
-                    glVertex2f(0,4);
-                    glTexCoord2f(1,1);
-                    glVertex2f(4,4);
-                    glTexCoord2f(1,0);
-                    glVertex2f(4,0);
-                glEnd();
-            glPopMatrix();
-
-            glPushMatrix();
-                glColor3f(1.0,1.0,1.0);
-                glBindTexture(GL_TEXTURE_2D,texture[0]);
-                glBegin(GL_QUADS);
-                    glTexCoord2f(0,0);
-                    glVertex2f(0,0);
-                    glTexCoord2f(0,1);
-                    glVertex2f(0,1);
-                    glTexCoord2f(1,1);
-                    glVertex2f(1,1);
-                    glTexCoord2f(1,0);
-                    glVertex2f(1,0);
-                glEnd();
-            glPopMatrix();
-        glDisable(GL_TEXTURE_2D);
-
-        glColor3f(1.0,0.0,0.0);
+        glColor3f(0.0,1.0,1.0);
         glBegin(GL_LINE_LOOP);
-            glVertex2f(-VIEW_W/2,-VIEW_H/2);
-            glVertex2f( VIEW_W/2,-VIEW_H/2);
-            glVertex2f( VIEW_W/2, VIEW_H/2);
-            glVertex2f(-VIEW_W/2, VIEW_H/2);
+            glVertex2f(-VIEW_W/4,-VIEW_H/4);
+            glVertex2f( VIEW_W/4,-VIEW_H/4);
+            glVertex2f( VIEW_W/4, VIEW_H/4);
+            glVertex2f(-VIEW_W/4, VIEW_H/4);
         glEnd();
+        checkIcon.render();
+        arara.render();
 
     glPopMatrix();
     glutSwapBuffers();

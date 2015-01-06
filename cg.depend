@@ -596,13 +596,12 @@
 	<iomanip>
 	<cmath>
 
-1420510358 source:d:\mega\projetoscodeblocks\engine2d\main.cpp
+1420514302 source:d:\mega\projetoscodeblocks\engine2d\main.cpp
 	<GL/gl.h>
 	<GL/glu.h>
 	<GL/glut.h>
+	"Textured.h"
 	<iostream>
-	"wtypes.h"
-	"lodepng.h"
 	<iomanip>
 	<cmath>
 
@@ -620,5 +619,15 @@
 	<string>
 	"lodepng.h"
 	<iostream>
+	"lodepng.h"
+
+1420514132 source:d:\mega\projetoscodeblocks\engine2d\textured.cpp
+	"Textured.h"
+
+1420513348 d:\mega\projetoscodeblocks\engine2d\textured.h
+	<stdlib.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	<GL/glut.h>
 	"lodepng.h"
 
