@@ -3,6 +3,7 @@
 #include <GL/glut.h>
 #include <iostream>
 #include "wtypes.h"
+#include "lodepng.h"
 #include <iomanip>
 #include <cmath>
 
@@ -12,8 +13,8 @@
 #define FRAME_TIME      10
 
 // Camera Parameters
-#define VIEW_W          160
-#define VIEW_H          90
+#define VIEW_W          16
+#define VIEW_H          9
 
 // Keyboard Commands
 #define EXIT            27
@@ -23,6 +24,9 @@
 #define MOVE_RIGHT      'd'
 
 using namespace std;
+using namespace lodepng;
+
+unsigned int texture[1];
 
 double mouse_x      = 0;
 double mouse_y      = 0;
@@ -30,7 +34,6 @@ double mouse_y      = 0;
 // Screen Resolution
 int window_h        = 0;
 int window_v        = 0;
-
 
 // Camera position/motion
 double view_x       = 0;
@@ -66,6 +69,8 @@ void keyPressed(unsigned char key, int x, int y);
 
 void keyReleased(unsigned char key, int x, int y);
 
+void loadGLTextures(char* imagePath, int textureID);
+
 void updateValues(int n);
 
 void RenderScene();
@@ -77,6 +82,8 @@ int main(int argc, char **argv){
     glutInit(&argc, argv);
 
     iniGl();
+
+    loadGLTextures("iconeLixeira.png",0);
 
     glutMainLoop();
 
@@ -98,7 +105,7 @@ void getScreenResolution(int& h, int& v){
 }
 
 void iniGl(){
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
     glutInitWindowSize(window_h,window_v);
     glutCreateWindow(WINDOW_TITLE);
     glutMouseFunc(&mouseButton);
@@ -110,6 +117,11 @@ void iniGl(){
     glutIdleFunc(&RenderScene);
     glutTimerFunc(1,updateValues,0);
     glMatrixMode(GL_PROJECTION);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
     gluOrtho2D(x_min,x_max,y_min,y_max);
     if (FULL_SCREEN)
         glutFullScreen();
@@ -195,6 +207,18 @@ void keyReleased(unsigned char key, int x, int y){
     }
 }
 
+void loadGLTextures(char* imagePath, int textureID){
+    vector<unsigned char> image;
+    unsigned width;
+    unsigned height;
+    decode(image,width,height,imagePath);
+    glGenTextures(2, &texture[textureID]);
+    glBindTexture(GL_TEXTURE_2D, texture[textureID]);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
+}
+
 void updateValues(int n){
 
     // Frame limiter
@@ -226,23 +250,45 @@ void RenderScene(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPushMatrix();
 
+        glEnable(GL_TEXTURE_2D);
+            glPushMatrix();
+                glColor3f(1.0,1.0,1.0);
+                glBindTexture(GL_TEXTURE_2D,texture[0]);
+                glBegin(GL_QUADS);
+                    glTexCoord2f(0,0);
+                    glVertex2f(0,0);
+                    glTexCoord2f(0,1);
+                    glVertex2f(0,4);
+                    glTexCoord2f(1,1);
+                    glVertex2f(4,4);
+                    glTexCoord2f(1,0);
+                    glVertex2f(4,0);
+                glEnd();
+            glPopMatrix();
+
+            glPushMatrix();
+                glColor3f(1.0,1.0,1.0);
+                glBindTexture(GL_TEXTURE_2D,texture[0]);
+                glBegin(GL_QUADS);
+                    glTexCoord2f(0,0);
+                    glVertex2f(0,0);
+                    glTexCoord2f(0,1);
+                    glVertex2f(0,1);
+                    glTexCoord2f(1,1);
+                    glVertex2f(1,1);
+                    glTexCoord2f(1,0);
+                    glVertex2f(1,0);
+                glEnd();
+            glPopMatrix();
+        glDisable(GL_TEXTURE_2D);
+
         glColor3f(1.0,0.0,0.0);
         glBegin(GL_LINE_LOOP);
-            glVertex2f(0,0);
-            glVertex2f(0,5);
-            glVertex2f(5,5);
-            glVertex2f(5,0);
+            glVertex2f(-VIEW_W/2,-VIEW_H/2);
+            glVertex2f( VIEW_W/2,-VIEW_H/2);
+            glVertex2f( VIEW_W/2, VIEW_H/2);
+            glVertex2f(-VIEW_W/2, VIEW_H/2);
         glEnd();
-
-        glPushMatrix();
-            glTranslatef(1,1,0);
-            glColor3f(0.0,1.0,0.0);
-            glBegin(GL_LINE_LOOP);
-                glVertex2f(0,0);
-                glVertex2f(0,7);
-                glVertex2f(7,7);
-            glEnd();
-        glPopMatrix();
 
     glPopMatrix();
     glutSwapBuffers();
